@@ -1,55 +1,128 @@
-<p align="center">| <a href="https://huggingface.co/datasets/autoiac-project/iac-eval"><u>Dataset</u></a> | 🏆 <a href="https://huggingface.co/datasets/autoiac-project/iac-eval"><u>Leaderboard TBD</u></a> | 📖 <a href="https://www.cs-pk.com/neurips24-iac-eval.pdf"><u>NeurIPS 2024 Paper</u></a> |</p>
+# IaC-Eval: Enhanced with Open Source LLMs and Containerization
 
-# IaC-Eval---first edition
+This project is an enhanced version of the original IaC-Eval project, focusing on proving that lightweight, specialized open-source LLMs can compete with OpenAI's models for Infrastructure-as-Code (IaC) generation tasks.
 
-IaC-Eval is a comprehensive framework for quantitatively evaluating the capabilities of large language models in cloud IaC code generation. Infrastructure-as-Code (IaC) is an important component of cloud computing, that allows the definition of cloud infrastructure in high-level programs. Our framework targets Terraform specifically for now. We leave integration of other IaC tools as future work. 
+## 🎯 Project Objective
 
-IaC-Eval also provides the first human-curated and challenging Infrastructure-as-Code (IaC) dataset containing 458 questions ranging from simple to difficult across various cloud services (targeting AWS for now), which can be found in our [HuggingFace repository](https://huggingface.co/datasets/autoiac-project/iac-eval).
+The main goal of this enhanced version is to demonstrate that open-source LLMs, despite being much lighter and more specialized, can rival OpenAI's LLMs in generating quality Terraform HCL code. This work challenges the assumption that only large, proprietary models can handle complex infrastructure code generation tasks.
 
-**We are actively developing and patching the project. However, as of now, IaC-Eval is not production-ready.** 
+**IaC-Eval** is a comprehensive project for quantitatively evaluating the capabilities of large language models in cloud Infrastructure-as-Code generation. The framework specifically targets Terraform HCL code generation and provides the first human-curated and challenging IaC dataset containing 458 questions ranging from simple to difficult across various AWS cloud services.
 
-## Installation
+**Dataset Features:**
+- 458 carefully curated Infrastructure-as-Code tasks
+- Varying difficulty levels from simple to complex
+- Coverage of diverse AWS services and use cases
+- Human-validated reference solutions
+- Available on [HuggingFace](https://huggingface.co/datasets/autoiac-project/iac-eval)
 
-1. Install Terraform (also [install AWS CLI and setup credentials](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/aws-build#prerequisites))
-2. Install [Opa] 0.60.0 version(https://www.openpolicyagent.org/docs/latest/#1-download-opa) (make sure to add opa to path).
-3. <sup>*</sup>Obtain the following LLM model inference API keys as appropriate, depending on which of our currently supported models you want to perform evaluation on:
-- [OpenAI API token](https://platform.openai.com/docs/quickstart/account-setup): for GPT-3.5-Turbo and GPT-4
-- [Google API token](https://ai.google.dev/gemini-api/docs/quickstart?lang=python#set-up-api-key): for Gemini-1.0-Pro
-- [Replicate API token](https://replicate.com/): for CodeLlama and WizardCoder variants
+For detailed information about the original project, evaluation methodologies, and dataset structure, please refer to the [original README](README_original.md).
 
-<sup>*</sup> Our evaluation against MagiCoder was performed on a manually deployed AWS SageMaker instance inference endpoint. We provide more details on our setup script, see `evaluation/README.md`, if that is of interest.  
+## 🚀 New Features
 
-### Using the Evaluation Pipeline
+We have extended the original IaC-Eval project with the following enhancements:
 
-To access and utilize the evaluation pipeline, you need to switch to a specific branch of this repository and set up the environment. Follow these steps:
+### 1. Complete Pipeline Containerization
+- **Dockerized Environment**: Full containerization of the evaluation pipeline for consistent, reproducible results
+- **Easy Deployment**: One-command setup using Docker Compose
+- **Isolated Environment**: No need to manage complex dependencies manually
 
-1. Ensure you have the `main` branch of the project checked out.
+### 2. Ollama Integration
+- **Open Source LLMs**: Integration of various open-source models through [Ollama](https://ollama.com/)
+- **Local Inference**: Run evaluations locally without external API dependencies
+- **Cost-Effective**: Eliminate API costs while maintaining evaluation quality
 
-2. Install the Conda environment by running:
+### 3. Results Showcase
+- **Live Demo**: View our comprehensive results at [pierrelaurent.ovh/llm4cloud/](http://pierrelaurent.ovh/llm4cloud/)
+- **Performance Comparison**: Side-by-side comparison between open-source and proprietary models
+- **Interactive Dashboard**: Explore results across different models and strategies
 
-   ```shell
-   conda env create -f environment.yml
+## 🛠️ Quick Setup with Docker
+
+### Prerequisites
+- Docker and Docker Compose V2 installed on your system
+- AWS credentials for Terraform validation
+
+### Installation Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd iac-eval-tsp
+    ```
+2. **Run the automated setup**
+   ```bash
+   ./run-docker-pipeline.sh
    ```
+3. **Follow the interactive prompts**
+    - Enter your AWS credentials
+    - Select an Ollama model (e.g., Ollama-codegemma:7b)
+    - Choose an evaluation strategy (normal, multi-turn, COT, FSP)
+    - Set the number of samples to evaluate
 
-3. Activate the newly created Conda environment named `iac-eval`:
+4. **Monitor the evaluation, the pipeline will automatically :**
+    - Pull the required Docker images
+    - Set up the evaluation environment
+    - Run the selected model against the IaC dataset
+    - Generate comprehensive results in CSV format
 
-   ```shell
-   conda activate iac-eval
-   ```
+## 📁 Project Main Structure
+```
+├── evaluation/                    # Core evaluation pipeline and metrics
+│   ├── eval.py                   # Main evaluation script
+│   ├── models.py                 # LLM model implementations and interfaces
+│   ├── metrics.py                # Evaluation metrics (BLEU, exact match, etc.)
+│   ├── data.py                   # Dataset loading and processing utilities
+│   ├── prompt_templates.py       # Prompt generation for different strategies
+│   ├── llm-judge-eval.py         # LLM-based evaluation metrics
+│   ├── config_*.json             # Configuration files for different models
+│   ├── misc/                     # Additional evaluation utilities
+│   │   ├── ablation/             # Ablation study scripts
+│   │   ├── ablation-judge/       # LLM judge ablation studies
+│   │   ├── ablation-multiple-sample/  # Pass@k metrics calculation
+│   │   └── complete-dataset-measurement/  # Dataset complexity analysis
+│   └── logs/                     # Evaluation logs and outputs
+│
+├── retriever/                     # RAG (Retrieval-Augmented Generation) components
+│   ├── llama_index_retriever.py   # Document retrieval and indexing
+│   ├── terraform-provider-aws/    # AWS Terraform documentation
+│   └── aws-index/                 # Pre-built document index
+│
+├── templates/                     # Prompt templates for different strategies
+│   ├── cot/                       # Chain of Thought prompts
+│   ├── fsp/                       # Few-Shot Prompting templates
+│   ├── multi-turn/                # Multi-turn conversation templates
+│   └── rag/                       # RAG-specific prompt templates
+│
+├── local-dataset/                 # Local dataset storage and management
+│   ├── data/                     # Core dataset files
+│   └── processed/                # Preprocessed dataset variants
+│
+├── results/                       # Evaluation results and metrics
+│   ├── [model-name]/             # Results organized by model
+│   └── aggregated/               # Cross-model comparison results
+│
+├── licenses/                      # License information for models
+│   └── README.md                  # License details for different LLMs
+│
+├── util/                         # Utility scripts and helpers
+│   ├── aws_utils.py              # AWS credential and service utilities
+│   └── terraform_utils.py        # Terraform validation helpers
+│
+├── docker-compose.yml            # Docker orchestration configuration
+├── Dockerfile                    # Container definition with dependencies
+├── entrypoint-iac-eval.sh       # Container entrypoint script
+├── run-docker-pipeline.sh       # Automated setup and execution script
+├── setup.sh                      # Environment setup script
+├── environment.yml               # Conda environment specification
+└── README_original.md            # Original project documentation
+```
 
-   Note: before `conda activate` you might need to do `conda init SHELL_NAME` on your preferred shell (e.g. `conda init bash`). If you run into problems initializing the shell session, try referring to [this GitHub issue](https://github.com/conda/conda/issues/13423#issuecomment-2113968807) for a fix.
- 
-4. (Optional) Preconfigure the retriever database (if you would like to use the RAG strategy): refer to instructions in `retriever/README.md`.
+## 📊 Evaluation Strategies
+- **Standard**: Direct prompt-to-code generation
+- **Multi-turn**: Interactive refinement with error feedback
+- **COT (Chain of Thought)**: Step-by-step reasoning approach
+- **FSP (Few-Shot Prompting)**: Learning from examples
+- **RAG**: Retrieval-augmented generation with documentation
 
-5. See instructions in `evaluation/README.md` for details on how to use the main pipeline: `eval.py`, and other scripts.
-
-Note: You can run `./setup.sh` to check if you have Terraform and OPA installed. It will also create and activate the necessary conda environment. The shell script assumes you are using `bash`, change `#!/bin/SHELL` to your preferred shell in the script.
-
-## Contributing
-
-We welcome all forms of contribution! IaC-Eval aims to quantitatively and comprehensively evaluate the IaC code generation capabilities of large language models. If you find bugs or have ideas, please share them via GitHub Issues. This includes contributions to IaC-Eval's dataset, whose format can be found in it's [HuggingFace repository](https://huggingface.co/datasets/autoiac-project/iac-eval).
-
-
-## Acknowledgments
-
-<https://github.com/openai/human-eval/tree/master>
+## 📄 License
+This project maintains the same license as the original IaC-Eval project. See [LICENSE.txt](LICENSE.txt) for details.
